@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Module implements Serializable, Cloneable {
+public class ModuleSignature implements Serializable, Cloneable {
 	
 	private String name;
 	private List<Port> ports = new ArrayList<Port>();

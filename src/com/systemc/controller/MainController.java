@@ -3,14 +3,16 @@ package com.systemc.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.systemc.model.Module;
+import com.systemc.model.ModuleSignature;
 import com.systemc.model.Port;
+import com.systemc.model.Signal;
 import com.systemc.util.StringUtil;
 
 public class MainController {
 
-	private List<Module> modules;
-	private Module currentModule;
+	private List<ModuleSignature> moduleSignatures;
+	private ModuleSignature currentModuleSignature;
+	private List<Signal> signals;
 
 	private enum Scope {
 		MODULE, METHOD, MODULE_METHOD, GLOBAL
@@ -20,8 +22,12 @@ public class MainController {
 		SC_MODULE, SC_MAIN, MAIN
 	};
 
-	private enum PortName {
+	private enum PortType {
 		SC_IN, SC_OUT, SC_INOUT, SC_PORT, SC_FIFO_IN, SC_FIFO_OUT, SC_CLK_IN
+	};
+	
+	private enum SignalType {
+		SC_SIGNAL, SC_FIFO
 	};
 
 	private enum Other {
@@ -30,59 +36,66 @@ public class MainController {
 	private String lastLine = "";
 
 	private Scope currentScope;
-
-	public List<Module> getModules(List<String> lines) {
-
+	
+	public List<Signal> getSignals(List<String> lines, List<ModuleSignature> moduleSignatures) {
+		
 		currentScope = Scope.GLOBAL;
 
-		modules = new ArrayList<Module>();
+		signals = new ArrayList<Signal>();
+		this.moduleSignatures = new ArrayList<ModuleSignature>();
 
 		for (String line : lines) {
 			line = StringUtil.trim(line);
 
-			if (currentScope.equals(Scope.METHOD)) {
+			if (currentScope.equals(Scope.METHOD)) { // sc_main
 				// Check end of method
-				if (this.doesExists(line, "}")) {
+				if (StringUtil.doesExists(line, "}")) {
 					// Change scope
 					this.changeScope(Boolean.FALSE);
 				}
+				// Check for module instance
+				
+				// Check for signal instance
+				
+				// Check for 
 
 				// else ignore
 			} else if (currentScope.equals(Scope.MODULE)) {
 
 				// else check for method start
-				if (this.doesExists(line, "{")) {
+				if (StringUtil.doesExists(line, "{")) {
 					// Change scope
 					this.changeScope(Boolean.TRUE);
 				}
 				// else check end of module
-				else if (this.doesExists(line, "}")) {
+				else if (StringUtil.doesExists(line, "}")) {
 					// Change scope
 					this.changeScope(Boolean.FALSE);
 				}
 				// TODO: Check for port name
 				else {
-					if (currentModule != null) {
+					/*if (currentModuleSignature != null) {
 
-						for (PortName portName : PortName.values()) {
-							if (this.doesExists(line, portName.toString())) {
+						for (PortType portName : PortType.values()) {
+							if (StringUtil.doesExists(line, portName.toString())) {
 								// parse port name
 								Port port = new Port();
 
-								port.setName(this.getSubString(line, " ", ";"));
-								port.setDataType(this.getSubString(line, "<", ">"));
+								port.setName(StringUtil.getSubString(line, " ", ";"));
+								port.setDataType(StringUtil.getSubString(line, "<", ">"));
 								port.setType(portName.toString().toLowerCase());
+								port.setModuleSignature(currentModuleSignature);
 								
-								currentModule.getPorts().add(port);
+								currentModuleSignature.getPorts().add(port);
 							}
 						}
-					}
+					}*/
 				}
 
 				// else ignore
 			} else if (currentScope.equals(Scope.MODULE_METHOD)) {
 				// Check end of method
-				if (this.doesExists(line, "}")) {
+				if (StringUtil.doesExists(line, "}")) {
 					// Change scope
 					this.changeScope(Boolean.FALSE);
 				}
@@ -91,7 +104,81 @@ public class MainController {
 			} else if (currentScope.equals(Scope.GLOBAL)) {
 				// Check for module
 				// If no module then check for method
-				if (this.doesExists(line, "{")) {
+				if (StringUtil.doesExists(line, "{")) {
+					// Change scope
+					this.changeScope(Boolean.TRUE);
+				}
+				// else ignore
+			}
+			
+			lastLine = line;
+		}
+		
+		return signals;
+	}
+
+	public List<ModuleSignature> getModules(List<String> lines) {
+
+		currentScope = Scope.GLOBAL;
+
+		moduleSignatures = new ArrayList<ModuleSignature>();
+
+		for (String line : lines) {
+			line = StringUtil.trim(line);
+
+			if (currentScope.equals(Scope.METHOD)) {
+				// Check end of method
+				if (StringUtil.doesExists(line, "}")) {
+					// Change scope
+					this.changeScope(Boolean.FALSE);
+				}
+
+				// else ignore
+			} else if (currentScope.equals(Scope.MODULE)) {
+
+				// else check for method start
+				if (StringUtil.doesExists(line, "{")) {
+					// Change scope
+					this.changeScope(Boolean.TRUE);
+				}
+				// else check end of module
+				else if (StringUtil.doesExists(line, "}")) {
+					// Change scope
+					this.changeScope(Boolean.FALSE);
+				}
+				// TODO: Check for port name
+				else {
+					if (currentModuleSignature != null) {
+
+						for (PortType portName : PortType.values()) {
+							if (StringUtil.doesExists(line, portName.toString())) {
+								// parse port name
+								Port port = new Port();
+
+								port.setName(StringUtil.getSubString(line, " ", ";"));
+								port.setDataType(StringUtil.getSubString(line, "<", ">"));
+								port.setType(portName.toString().toLowerCase());
+								port.setModuleSignature(currentModuleSignature);
+								
+								currentModuleSignature.getPorts().add(port);
+							}
+						}
+					}
+				}
+
+				// else ignore
+			} else if (currentScope.equals(Scope.MODULE_METHOD)) {
+				// Check end of method
+				if (StringUtil.doesExists(line, "}")) {
+					// Change scope
+					this.changeScope(Boolean.FALSE);
+				}
+
+				// else ignore
+			} else if (currentScope.equals(Scope.GLOBAL)) {
+				// Check for module
+				// If no module then check for method
+				if (StringUtil.doesExists(line, "{")) {
 					// Change scope
 					this.changeScope(Boolean.TRUE);
 				}
@@ -101,11 +188,7 @@ public class MainController {
 			lastLine = line;
 		}
 
-		return modules;
-	}
-
-	private Boolean doesExists(String parent, String child) {
-		return parent.toLowerCase().contains(child.toLowerCase());
+		return moduleSignatures;
 	}
 
 	private void changeScope(Boolean increase) {
@@ -122,9 +205,9 @@ public class MainController {
 				} else if (currentScope.equals(Scope.MODULE)) {
 					currentScope = Scope.GLOBAL;
 
-					modules.add((Module) currentModule.clone());
+					moduleSignatures.add((ModuleSignature) currentModuleSignature.clone());
 
-					currentModule = null;
+					currentModuleSignature = null;
 				} else if (currentScope.equals(Scope.MODULE_METHOD)) {
 					currentScope = Scope.MODULE;
 				} else {
@@ -135,18 +218,18 @@ public class MainController {
 
 				if (currentScope.equals(Scope.GLOBAL)) {
 					// Check if it should goto module or method
-					if (this.doesExists(lastLine, Keyword.SC_MODULE.toString())) {
+					if (StringUtil.doesExists(lastLine, Keyword.SC_MODULE.toString())) {
 
 						currentScope = Scope.MODULE;
 
-						currentModule = new Module();
+						currentModuleSignature = new ModuleSignature();
 
-						String moduleName = this.getSubString(lastLine, "(", ")");
+						String moduleName = StringUtil.getSubString(lastLine, "(", ")");
 
-						currentModule.setName(moduleName);
+						currentModuleSignature.setName(moduleName);
 
-					} else if (this.doesExists(lastLine, Keyword.SC_MAIN.toString())) {
-
+					} else if (StringUtil.doesExists(lastLine, Keyword.SC_MAIN.toString())) {
+						currentScope = Scope.METHOD;
 					}
 				} else if (currentScope.equals(Scope.MODULE)) {
 					currentScope = Scope.MODULE_METHOD;
@@ -163,10 +246,6 @@ public class MainController {
 		} catch (CloneNotSupportedException e) {
 		}
 
-	}
-
-	private String getSubString(String parent, String delimator1, String delimator2) {
-		return parent.substring(parent.indexOf(delimator1) + 1, parent.indexOf(delimator2));
 	}
 
 }
