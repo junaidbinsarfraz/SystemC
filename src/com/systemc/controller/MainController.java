@@ -3,6 +3,7 @@ package com.systemc.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.systemc.model.ModuleInstance;
 import com.systemc.model.ModuleSignature;
 import com.systemc.model.Port;
 import com.systemc.model.Signal;
@@ -13,6 +14,7 @@ public class MainController {
 	private List<ModuleSignature> moduleSignatures;
 	private ModuleSignature currentModuleSignature;
 	private List<Signal> signals;
+	private List<ModuleInstance> moduleInstances;
 
 	private enum Scope {
 		MODULE, METHOD, MODULE_METHOD, GLOBAL
@@ -41,6 +43,7 @@ public class MainController {
 		
 		currentScope = Scope.GLOBAL;
 
+		moduleInstances = new ArrayList<ModuleInstance>();
 		signals = new ArrayList<Signal>();
 		this.moduleSignatures = new ArrayList<ModuleSignature>();
 
@@ -53,11 +56,103 @@ public class MainController {
 					// Change scope
 					this.changeScope(Boolean.FALSE);
 				}
-				// Check for module instance
 				
-				// Check for signal instance
+				// TODO: Detect signal
+				for(SignalType signalType : SignalType.values()) {
+					if(StringUtil.doesExists(line, signalType.toString())) {
+						// Extract data type
+						
+						if(StringUtil.doesExists(line, "<") && StringUtil.doesExists(line, ">")) {
+							// This is a signal
+							String signalDataType = StringUtil.getSubString(line, "<", ">");
+							
+							Signal signal = new Signal();
+							
+							signal.setDataType(signalDataType);
+							
+							if(StringUtil.doesExists(line, " ") && StringUtil.doesExists(line, ";")) {
+								
+								signal.setName(StringUtil.getSubString(line, " ", ";"));
+								
+								// Add to signal list
+								this.signals.add(signal);
+							}
+						}
+					}
+				}
 				
-				// Check for 
+				// TODO: Detect Module Instance
+				for(ModuleSignature moduleSignature : this.moduleSignatures) {
+					
+					if(StringUtil.doesExists(line, moduleSignature.getName())) {
+						if(StringUtil.doesExists(line, " ") && StringUtil.doesExists(line, ";")) {
+							// Get module name
+							
+							String moduleName = StringUtil.getSubString(line, " ", "=");
+							
+							moduleName = moduleName.replaceAll("\\s", "");
+							
+							ModuleInstance moduleInstance = new ModuleInstance();
+							
+							moduleInstance.setModuleSignature(moduleSignature);
+							moduleInstance.setName(moduleName);
+							
+							moduleInstances.add(moduleInstance);
+						}
+					}
+				}
+				
+				// TODO: Detect signal link to module instance's port
+				/*for(ModuleInstance moduleInstance : moduleInstances) {
+					
+					if(StringUtil.doesExists(line, moduleInstance.getName())) {
+						// Module name detected 
+						
+						for(Signal signal : signals) {
+							if(StringUtil.doesExists(line, signal.getName())) {
+								
+								for(Port port : moduleInstance.getModuleSignature().getPorts()) {
+									if(StringUtil.doesExists(line, port.getName())) {
+										String portName = 
+										
+										moduleInstance.getPortInstances().put(port, value)
+									}
+								}
+								
+							}
+						}
+						
+					}
+					
+				}*/
+				
+				for(Signal signal : signals) {
+					if(StringUtil.doesExists(line, signal.getName())) {
+						
+						for(ModuleInstance moduleInstance : moduleInstances) {
+							if(StringUtil.doesExists(line, moduleInstance.getName())) {
+								
+								for(Port port : moduleInstance.getModuleSignature().getPorts()) {
+									if(StringUtil.doesExists(line, port.getName())) {
+										
+										// Verify and Link
+										
+//										if()
+										
+										moduleInstance.getPortInstances().add(port);
+										
+										signal.getModuleInstances().put(moduleInstance.getName(), moduleInstance);
+										
+										/*String portName = 
+										
+										moduleInstance.getPortInstances().put(port, value)*/
+									}
+								}
+								
+							}
+						}
+					}
+				}
 
 				// else ignore
 			} else if (currentScope.equals(Scope.MODULE)) {
@@ -122,7 +217,7 @@ public class MainController {
 		currentScope = Scope.GLOBAL;
 
 		moduleSignatures = new ArrayList<ModuleSignature>();
-
+		
 		for (String line : lines) {
 			line = StringUtil.trim(line);
 
@@ -132,7 +227,8 @@ public class MainController {
 					// Change scope
 					this.changeScope(Boolean.FALSE);
 				}
-
+				
+				
 				// else ignore
 			} else if (currentScope.equals(Scope.MODULE)) {
 
@@ -247,5 +343,5 @@ public class MainController {
 		}
 
 	}
-
+	
 }

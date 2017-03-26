@@ -1,13 +1,13 @@
 package com.systemc.model;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ModuleInstance implements Serializable {
 
 	private String name;
-	private Map<Port, String> portInstances = new HashMap<Port, String>();
+	private List<Port> portInstances = new ArrayList<Port>();
 	private ModuleSignature moduleSignature = new ModuleSignature();
 
 	public String getName() {
@@ -18,20 +18,20 @@ public class ModuleInstance implements Serializable {
 		this.name = name;
 	}
 
-	public Map<Port, String> getPortInstances() {
-		return portInstances;
-	}
-
-	public void setPortInstances(Map<Port, String> portInstances) {
-		this.portInstances = portInstances;
-	}
-
 	public ModuleSignature getModuleSignature() {
 		return moduleSignature;
 	}
 
 	public void setModuleSignature(ModuleSignature moduleSignature) {
 		this.moduleSignature = moduleSignature;
+	}
+
+	public List<Port> getPortInstances() {
+		return portInstances;
+	}
+
+	public void setPortInstances(List<Port> portInstances) {
+		this.portInstances = portInstances;
 	}
 
 }

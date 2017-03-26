@@ -1,14 +1,14 @@
 package com.systemc.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Signal {
 
 	private String name;
 	private String type; // sc_signal or sc_fifo
 	private String dataType; // int, bool etc
-	private List<ModuleInstance> moduleInstances = new ArrayList<ModuleInstance>();
+	private Map<String, ModuleInstance> moduleInstances = new HashMap<String, ModuleInstance>();
 
 	public String getName() {
 		return name;
@@ -34,11 +34,11 @@ public class Signal {
 		this.dataType = dataType;
 	}
 
-	public List<ModuleInstance> getModuleInstances() {
+	public Map<String, ModuleInstance> getModuleInstances() {
 		return moduleInstances;
 	}
 
-	public void setModuleInstances(List<ModuleInstance> moduleInstances) {
+	public void setModuleInstances(Map<String, ModuleInstance> moduleInstances) {
 		this.moduleInstances = moduleInstances;
 	}
 
