@@ -42,12 +42,12 @@ int sc_main(int argc, char* argv[])
 {
 	sc_clock clk("clk", 5, SC_NS);
         sc_fifo<int> f1("f1");
-	producer p("p");
-	consumer c("c");
+	producer* p = new producer("p");
+	consumer* c = new consumer("c");
 
-	p.clk(clk);
-	p.b(f1);
-	c.a(f1);
+	p->clk(clk);
+	p->b(f1);
+	c->a(f1);
 
 	sc_start(10000, SC_NS);
 

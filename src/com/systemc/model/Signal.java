@@ -1,7 +1,9 @@
 package com.systemc.model;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class Signal {
 
@@ -40,6 +42,29 @@ public class Signal {
 
 	public void setModuleInstances(Map<String, ModuleInstance> moduleInstances) {
 		this.moduleInstances = moduleInstances;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("Signal Name: " + this.name + "\n");
+		if(moduleInstances != null && moduleInstances.size() > 0) {
+			sb.append("\nModule Instances:\n\n");
+		} else {
+			sb.append("\nNo Module Instance\n");
+		}
+		
+		Iterator entries = moduleInstances.entrySet().iterator();
+		while (entries.hasNext()) {
+		  Entry thisEntry = (Entry) entries.next();
+		  ModuleInstance moduleInstance = (ModuleInstance) thisEntry.getValue();
+		  
+			sb.append(moduleInstance.toString() + "\n");
+		  
+		}
+		
+		return sb.toString();
 	}
 
 }

@@ -39,7 +39,7 @@ public class MainController {
 
 	private Scope currentScope;
 	
-	public List<Signal> getSignals(List<String> lines, List<ModuleSignature> moduleSignatures) {
+	public List<Signal> getSignals(final List<String> lines, final List<ModuleSignature> moduleSignatures) {
 		
 		currentScope = Scope.GLOBAL;
 
@@ -72,7 +72,7 @@ public class MainController {
 							
 							if(StringUtil.doesExists(line, " ") && StringUtil.doesExists(line, ";")) {
 								
-								signal.setName(StringUtil.getSubString(line, " ", ";"));
+								signal.setName(StringUtil.getSubString(line, " ", "("));
 								
 								// Add to signal list
 								this.signals.add(signal);
@@ -82,10 +82,10 @@ public class MainController {
 				}
 				
 				// TODO: Detect Module Instance
-				for(ModuleSignature moduleSignature : this.moduleSignatures) {
+				for(ModuleSignature moduleSignature : moduleSignatures) {
 					
 					if(StringUtil.doesExists(line, moduleSignature.getName())) {
-						if(StringUtil.doesExists(line, " ") && StringUtil.doesExists(line, ";")) {
+						if(StringUtil.doesExists(line, " ") && StringUtil.doesExists(line, "=")) {
 							// Get module name
 							
 							String moduleName = StringUtil.getSubString(line, " ", "=");
@@ -137,15 +137,24 @@ public class MainController {
 										
 										// Verify and Link
 										
-//										if()
+										String portName = StringUtil.getSubString(line, ">", "(");
 										
-										moduleInstance.getPortInstances().add(port);
+										portName = portName.replaceAll("\\s", "");
 										
-										signal.getModuleInstances().put(moduleInstance.getName(), moduleInstance);
+										String moduleName = line.split("->") != null ? line.split("->")[0] : "";
 										
-										/*String portName = 
+										moduleName = moduleName.replaceAll("\\s", "");
 										
-										moduleInstance.getPortInstances().put(port, value)*/
+										String signalName = StringUtil.getSubString(line, "(", ")");
+										
+										signalName = signalName.replaceAll("\\s", "");
+										
+										if(port.getName().equals(portName) && moduleInstance.getName().equals(moduleName) && signal.getName().equals(signalName)) {
+											
+											moduleInstance.getPortInstances().add(port);
+											
+											signal.getModuleInstances().put(moduleInstance.getName(), moduleInstance);
+										}
 									}
 								}
 								

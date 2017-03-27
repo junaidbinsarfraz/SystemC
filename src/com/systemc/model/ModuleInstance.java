@@ -33,5 +33,22 @@ public class ModuleInstance implements Serializable {
 	public void setPortInstances(List<Port> portInstances) {
 		this.portInstances = portInstances;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("\n\tModuleInstance Name: "+ this.name);
+		sb.append("\n\t\tDataType: "+ this.moduleSignature.getName());
+		sb.append("\n\t\tConnected port to the signal: ");
+		
+		for(Port port : portInstances) {
+			sb.append("\n\t\t\tPort Name: " + port.getName());
+		}
+		
+		sb.append("\n");
+		
+		return sb.toString();
+	}
 
 }
