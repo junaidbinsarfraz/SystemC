@@ -4,10 +4,6 @@ import java.io.Serializable;
 
 public class Port implements Serializable, Cloneable {
 
-	/*public enum Type {
-		sc_in, sc_out, sc_inout, sc_port, sc_fifo_in, sc_fifo_out, sc_clk_in
-	};*/
-
 	private String name;
 	private String type; // sc_in, sc_out, sc_inout, sc_port, sc_fifo_in, sc_fifo_out, sc_clk_in
 	private String dataType; // int, bool etc

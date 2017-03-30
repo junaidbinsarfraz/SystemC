@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The class FileUtil is use to read the file
+ */
 public class FileUtil {
 
 	public static List<String> readFile(String name) {

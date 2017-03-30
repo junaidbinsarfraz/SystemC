@@ -9,6 +9,10 @@ import com.systemc.model.Port;
 import com.systemc.model.Signal;
 import com.systemc.util.StringUtil;
 
+/**
+ * The class MainController is use to getSignals and getModules. This is where
+ * the main logic of program written
+ */
 public class MainController {
 
 	private List<ModuleSignature> moduleSignatures;
@@ -27,7 +31,7 @@ public class MainController {
 	private enum PortType {
 		SC_IN, SC_OUT, SC_INOUT, SC_PORT, SC_FIFO_IN, SC_FIFO_OUT, SC_CLK_IN
 	};
-	
+
 	private enum SignalType {
 		SC_SIGNAL, SC_FIFO
 	};
@@ -38,9 +42,19 @@ public class MainController {
 	private String lastLine = "";
 
 	private Scope currentScope;
-	
+
+	/**
+	 * The method getSignals() is use to extract signal and signal connections
+	 * from the lines given to it
+	 * 
+	 * @param lines
+	 *            read from input file
+	 * @param moduleSignatures
+	 *            list of module signature
+	 * @return list of signals with connections
+	 */
 	public List<Signal> getSignals(final List<String> lines, final List<ModuleSignature> moduleSignatures) {
-		
+
 		currentScope = Scope.GLOBAL;
 
 		moduleInstances = new ArrayList<ModuleInstance>();
@@ -56,108 +70,118 @@ public class MainController {
 					// Change scope
 					this.changeScope(Boolean.FALSE);
 				}
-				
-				// TODO: Detect signal
-				for(SignalType signalType : SignalType.values()) {
-					if(StringUtil.doesExists(line, signalType.toString())) {
+
+				// Detect signal
+				for (SignalType signalType : SignalType.values()) {
+					if (StringUtil.doesExists(line, signalType.toString())) {
 						// Extract data type
-						
-						if(StringUtil.doesExists(line, "<") && StringUtil.doesExists(line, ">")) {
+
+						if (StringUtil.doesExists(line, "<") && StringUtil.doesExists(line, ">")) {
 							// This is a signal
 							String signalDataType = StringUtil.getSubString(line, "<", ">");
-							
+
 							Signal signal = new Signal();
-							
+
 							signal.setDataType(signalDataType);
-							
-							if(StringUtil.doesExists(line, " ") && StringUtil.doesExists(line, ";")) {
-								
+
+							if (StringUtil.doesExists(line, " ") && StringUtil.doesExists(line, ";")) {
+
 								signal.setName(StringUtil.getSubString(line, " ", "("));
-								
+
 								// Add to signal list
 								this.signals.add(signal);
 							}
 						}
 					}
 				}
-				
-				// TODO: Detect Module Instance
-				for(ModuleSignature moduleSignature : moduleSignatures) {
-					
-					if(StringUtil.doesExists(line, moduleSignature.getName())) {
-						if(StringUtil.doesExists(line, " ") && StringUtil.doesExists(line, "=")) {
+
+				// Detect Module Instance
+				for (ModuleSignature moduleSignature : moduleSignatures) {
+
+					if (StringUtil.doesExists(line, moduleSignature.getName())) {
+						if (StringUtil.doesExists(line, "*") && StringUtil.doesExists(line, " ") && StringUtil.doesExists(line, "=")) {
 							// Get module name
-							
+
 							String moduleName = StringUtil.getSubString(line, " ", "=");
-							
+
 							moduleName = moduleName.replaceAll("\\s", "");
-							
+
 							ModuleInstance moduleInstance = new ModuleInstance();
-							
+
 							moduleInstance.setModuleSignature(moduleSignature);
 							moduleInstance.setName(moduleName);
-							
+
 							moduleInstances.add(moduleInstance);
+						} else if (StringUtil.doesExists(line, " ") && StringUtil.doesExists(line, "(") && StringUtil.doesExists(line, ")")
+								&& StringUtil.doesExists(line, "\"")) {
+
+							// Get module name
+
+							String moduleName = StringUtil.getSubString(line, " ", "(");
+
+							moduleName = moduleName.replaceAll("\\s", "");
+
+							ModuleInstance moduleInstance = new ModuleInstance();
+
+							moduleInstance.setModuleSignature(moduleSignature);
+							moduleInstance.setName(moduleName);
+
+							moduleInstances.add(moduleInstance);
+
 						}
 					}
 				}
-				
-				// TODO: Detect signal link to module instance's port
-				/*for(ModuleInstance moduleInstance : moduleInstances) {
-					
-					if(StringUtil.doesExists(line, moduleInstance.getName())) {
-						// Module name detected 
-						
-						for(Signal signal : signals) {
-							if(StringUtil.doesExists(line, signal.getName())) {
-								
-								for(Port port : moduleInstance.getModuleSignature().getPorts()) {
-									if(StringUtil.doesExists(line, port.getName())) {
-										String portName = 
-										
-										moduleInstance.getPortInstances().put(port, value)
-									}
-								}
-								
-							}
-						}
-						
-					}
-					
-				}*/
-				
-				for(Signal signal : signals) {
-					if(StringUtil.doesExists(line, signal.getName())) {
-						
-						for(ModuleInstance moduleInstance : moduleInstances) {
-							if(StringUtil.doesExists(line, moduleInstance.getName())) {
-								
-								for(Port port : moduleInstance.getModuleSignature().getPorts()) {
-									if(StringUtil.doesExists(line, port.getName())) {
-										
+
+				// Detect signal link to module instance's port
+				for (Signal signal : signals) {
+					if (StringUtil.doesExists(line, signal.getName())) {
+
+						for (ModuleInstance moduleInstance : moduleInstances) {
+							if (StringUtil.doesExists(line, moduleInstance.getName())) {
+
+								for (Port port : moduleInstance.getModuleSignature().getPorts()) {
+									if (StringUtil.doesExists(line, port.getName())) {
+
 										// Verify and Link
-										
-										String portName = StringUtil.getSubString(line, ">", "(");
-										
-										portName = portName.replaceAll("\\s", "");
-										
-										String moduleName = line.split("->") != null ? line.split("->")[0] : "";
-										
-										moduleName = moduleName.replaceAll("\\s", "");
-										
+
+										String portName = "", moduleName = "";
+
+										if (StringUtil.doesExists(line, ">")) {
+
+											portName = StringUtil.getSubString(line, ">", "(");
+
+											portName = portName.replaceAll("\\s", "");
+
+											moduleName = line.split("->") != null ? line.split("->")[0] : "";
+
+											moduleName = moduleName.replaceAll("\\s", "");
+
+										} else if (StringUtil.doesExists(line, ".")) {
+
+											portName = StringUtil.getSubString(line, ".", "(");
+
+											portName = portName.replaceAll("\\s", "");
+
+											moduleName = line.split("\\.") != null ? line.split("\\.")[0] : "";
+
+											moduleName = moduleName.replaceAll("\\s", "");
+
+										}
+
 										String signalName = StringUtil.getSubString(line, "(", ")");
-										
+
 										signalName = signalName.replaceAll("\\s", "");
-										
-										if(port.getName().equals(portName) && moduleInstance.getName().equals(moduleName) && signal.getName().equals(signalName)) {
-											
+
+										if (port.getName().equals(portName) && moduleInstance.getName().equals(moduleName)
+												&& signal.getName().equals(signalName)) {
+
 											moduleInstance.getPortInstances().add(port);
-											
+
 											signal.getModuleInstances().put(moduleInstance.getName(), moduleInstance);
 										}
 									}
 								}
-								
+
 							}
 						}
 					}
@@ -175,25 +199,6 @@ public class MainController {
 				else if (StringUtil.doesExists(line, "}")) {
 					// Change scope
 					this.changeScope(Boolean.FALSE);
-				}
-				// TODO: Check for port name
-				else {
-					/*if (currentModuleSignature != null) {
-
-						for (PortType portName : PortType.values()) {
-							if (StringUtil.doesExists(line, portName.toString())) {
-								// parse port name
-								Port port = new Port();
-
-								port.setName(StringUtil.getSubString(line, " ", ";"));
-								port.setDataType(StringUtil.getSubString(line, "<", ">"));
-								port.setType(portName.toString().toLowerCase());
-								port.setModuleSignature(currentModuleSignature);
-								
-								currentModuleSignature.getPorts().add(port);
-							}
-						}
-					}*/
 				}
 
 				// else ignore
@@ -214,19 +219,27 @@ public class MainController {
 				}
 				// else ignore
 			}
-			
+
 			lastLine = line;
 		}
-		
+
 		return signals;
 	}
 
+	/**
+	 * The method getModules() is use to extract module signatures from the
+	 * given lines
+	 * 
+	 * @param lines
+	 *            read from input file
+	 * @return list of module signatures
+	 */
 	public List<ModuleSignature> getModules(List<String> lines) {
 
 		currentScope = Scope.GLOBAL;
 
 		moduleSignatures = new ArrayList<ModuleSignature>();
-		
+
 		for (String line : lines) {
 			line = StringUtil.trim(line);
 
@@ -236,8 +249,7 @@ public class MainController {
 					// Change scope
 					this.changeScope(Boolean.FALSE);
 				}
-				
-				
+
 				// else ignore
 			} else if (currentScope.equals(Scope.MODULE)) {
 
@@ -251,7 +263,7 @@ public class MainController {
 					// Change scope
 					this.changeScope(Boolean.FALSE);
 				}
-				// TODO: Check for port name
+				// Check for port name
 				else {
 					if (currentModuleSignature != null) {
 
@@ -264,7 +276,7 @@ public class MainController {
 								port.setDataType(StringUtil.getSubString(line, "<", ">"));
 								port.setType(portName.toString().toLowerCase());
 								port.setModuleSignature(currentModuleSignature);
-								
+
 								currentModuleSignature.getPorts().add(port);
 							}
 						}
@@ -289,13 +301,19 @@ public class MainController {
 				}
 				// else ignore
 			}
-			
+
 			lastLine = line;
 		}
 
 		return moduleSignatures;
 	}
 
+	/**
+	 * The method changeScope() is use to current change of the program
+	 * 
+	 * @param increase
+	 *            local to global means increase else decrease
+	 */
 	private void changeScope(Boolean increase) {
 
 		if (currentScope == null) {
@@ -352,5 +370,5 @@ public class MainController {
 		}
 
 	}
-	
+
 }
