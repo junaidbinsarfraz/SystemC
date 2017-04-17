@@ -11,8 +11,16 @@ import java.util.List;
  */
 public class FileUtil {
 
+	/**
+	 * The method readFile() is use to read file and return all the lines
+	 * 
+	 * @param name
+	 *            filename to be read
+	 * @return list of lines
+	 */
 	public static List<String> readFile(String name) {
 
+		// To store each line from file
 		List<String> lines = new ArrayList<String>();
 
 		BufferedReader br = null;
@@ -27,6 +35,7 @@ public class FileUtil {
 
 			br = new BufferedReader(new FileReader(name));
 
+			// while not end-of-file, add line in lines list
 			while ((line = br.readLine()) != null) {
 				lines.add(line);
 			}

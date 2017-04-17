@@ -1,7 +1,8 @@
 package com.systemc.util;
 
 /**
- * The class StringUtil is use to manipulate the strings
+ * The class StringUtil is use to manipulate the strings like comparison and
+ * trim
  */
 public class StringUtil {
 

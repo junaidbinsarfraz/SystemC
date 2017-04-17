@@ -28,10 +28,12 @@ public class MainController {
 		SC_MODULE, SC_MAIN, MAIN
 	};
 
+	// Accepted port types
 	private enum PortType {
 		SC_IN, SC_OUT, SC_INOUT, SC_PORT, SC_FIFO_IN, SC_FIFO_OUT, SC_CLK_IN
 	};
 
+	// Accepted signal types
 	private enum SignalType {
 		SC_SIGNAL, SC_FIFO
 	};
@@ -55,15 +57,18 @@ public class MainController {
 	 */
 	public List<Signal> getSignals(final List<String> lines, final List<ModuleSignature> moduleSignatures) {
 
+		// Initially current scope is global
 		currentScope = Scope.GLOBAL;
 
 		moduleInstances = new ArrayList<ModuleInstance>();
 		signals = new ArrayList<Signal>();
 		this.moduleSignatures = new ArrayList<ModuleSignature>();
 
+		// Parse each line
 		for (String line : lines) {
 			line = StringUtil.trim(line);
-
+			
+			// Check if current scope is main method (sc_main)
 			if (currentScope.equals(Scope.METHOD)) { // sc_main
 				// Check end of method
 				if (StringUtil.doesExists(line, "}")) {
@@ -74,7 +79,7 @@ public class MainController {
 				// Detect signal
 				for (SignalType signalType : SignalType.values()) {
 					if (StringUtil.doesExists(line, signalType.toString())) {
-						// Extract data type
+						// Extract data type of signal
 
 						if (StringUtil.doesExists(line, "<") && StringUtil.doesExists(line, ">")) {
 							// This is a signal
@@ -100,7 +105,7 @@ public class MainController {
 
 					if (StringUtil.doesExists(line, moduleSignature.getName())) {
 						if (StringUtil.doesExists(line, "*") && StringUtil.doesExists(line, " ") && StringUtil.doesExists(line, "=")) {
-							// Get module name
+							// Get module name of module instance
 
 							String moduleName = StringUtil.getSubString(line, " ", "=");
 
@@ -111,11 +116,13 @@ public class MainController {
 							moduleInstance.setModuleSignature(moduleSignature);
 							moduleInstance.setName(moduleName);
 
+							// Add to module instances
 							moduleInstances.add(moduleInstance);
+							
 						} else if (StringUtil.doesExists(line, " ") && StringUtil.doesExists(line, "(") && StringUtil.doesExists(line, ")")
 								&& StringUtil.doesExists(line, "\"")) {
 
-							// Get module name
+							// Get module name of module instance
 
 							String moduleName = StringUtil.getSubString(line, " ", "(");
 
@@ -126,6 +133,7 @@ public class MainController {
 							moduleInstance.setModuleSignature(moduleSignature);
 							moduleInstance.setName(moduleName);
 
+							// Add to module instances
 							moduleInstances.add(moduleInstance);
 
 						}
@@ -142,10 +150,11 @@ public class MainController {
 								for (Port port : moduleInstance.getModuleSignature().getPorts()) {
 									if (StringUtil.doesExists(line, port.getName())) {
 
-										// Verify and Link
+										// Verify and Link module instance's port via signal instance
 
 										String portName = "", moduleName = "";
-
+										
+										// First syntax c.a(f1);
 										if (StringUtil.doesExists(line, ">")) {
 
 											portName = StringUtil.getSubString(line, ">", "(");
@@ -156,7 +165,9 @@ public class MainController {
 
 											moduleName = moduleName.replaceAll("\\s", "");
 
-										} else if (StringUtil.doesExists(line, ".")) {
+										} 
+										// Second syntax c->a(f1);
+										else if (StringUtil.doesExists(line, ".")) {
 
 											portName = StringUtil.getSubString(line, ".", "(");
 
@@ -236,13 +247,16 @@ public class MainController {
 	 */
 	public List<ModuleSignature> getModules(List<String> lines) {
 
+		// Initially current scope is global
 		currentScope = Scope.GLOBAL;
 
 		moduleSignatures = new ArrayList<ModuleSignature>();
 
+		// Parse each line
 		for (String line : lines) {
 			line = StringUtil.trim(line);
 
+			// Check if current scope is main method (sc_main)
 			if (currentScope.equals(Scope.METHOD)) {
 				// Check end of method
 				if (StringUtil.doesExists(line, "}")) {
@@ -251,7 +265,9 @@ public class MainController {
 				}
 
 				// else ignore
-			} else if (currentScope.equals(Scope.MODULE)) {
+			} 
+			// Check if current scope is module
+			else if (currentScope.equals(Scope.MODULE)) {
 
 				// else check for method start
 				if (StringUtil.doesExists(line, "{")) {
@@ -277,6 +293,7 @@ public class MainController {
 								port.setType(portName.toString().toLowerCase());
 								port.setModuleSignature(currentModuleSignature);
 
+								// Add port to current module
 								currentModuleSignature.getPorts().add(port);
 							}
 						}
@@ -316,10 +333,12 @@ public class MainController {
 	 */
 	private void changeScope(Boolean increase) {
 
+		// Check if current scope is null 
 		if (currentScope == null) {
 			return;
 		}
 		try {
+			// { determines that it's scope is increased
 			if (Boolean.FALSE.equals(increase)) {
 
 				if (currentScope.equals(Scope.GLOBAL)) {
@@ -337,7 +356,9 @@ public class MainController {
 					currentScope = Scope.GLOBAL;
 				}
 
-			} else {
+			} 
+			// } determines that it's scope is decreased
+			else {
 
 				if (currentScope.equals(Scope.GLOBAL)) {
 					// Check if it should goto module or method

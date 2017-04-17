@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+/**
+ * The Signal class is use to store signal data like name, type, dataType and connected moduleInstaces
+ */
 public class Signal {
 
 	private String name;
@@ -44,6 +47,9 @@ public class Signal {
 		this.moduleInstances = moduleInstances;
 	}
 	
+	/**
+	 * The toString() method is use to show object in string/displayable form
+	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

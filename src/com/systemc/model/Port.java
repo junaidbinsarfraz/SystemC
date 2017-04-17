@@ -2,6 +2,9 @@ package com.systemc.model;
 
 import java.io.Serializable;
 
+/**
+ * The class Port is use to store name, type, datatype and moduleSignature where it belongs 
+ */
 public class Port implements Serializable, Cloneable {
 
 	private String name;
@@ -41,16 +44,25 @@ public class Port implements Serializable, Cloneable {
 		this.moduleSignature = moduleSignature;
 	}
 
+	/**
+	 * The clone() method is use to clone the object
+	 */
 	@Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
 	
+	/**
+	 * The toString() method is use to show object in string/displayable form
+	 */
 	@Override
 	public String toString() {
 		return "\tName: " + this.name + "\n\ttype: " + this.type + "\n\tdata-type: " + this.dataType;
 	}
 	
+	/**
+	 * The equals() method is use to compare two objects and check if both are same or not
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) {

@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The ModuleSignature class is use to store data of ModuleSignature like name and ports
+ */
 public class ModuleSignature implements Serializable, Cloneable {
 	
 	private String name;
@@ -25,11 +28,17 @@ public class ModuleSignature implements Serializable, Cloneable {
 		this.ports = ports;
 	}
 	
+	/**
+	 * The clone() method is use to clone the object
+	 */
 	@Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
 	
+	/**
+	 * The toString() method is use to show object in string/displayable form
+	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

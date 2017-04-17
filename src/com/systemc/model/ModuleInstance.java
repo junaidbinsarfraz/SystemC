@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The ModuleInstance class is the instance of ModuleSignature. 
+ * It is use to store data of ModuleInstance like name, port instances and ModuleSignature
+ */
 public class ModuleInstance implements Serializable {
 
 	private String name;
@@ -34,6 +38,9 @@ public class ModuleInstance implements Serializable {
 		this.portInstances = portInstances;
 	}
 	
+	/**
+	 * The toString() method is use to show object in string/displayable form
+	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
